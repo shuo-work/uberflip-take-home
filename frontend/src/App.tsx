@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import RegisterPage from "./pages/RegisterPage";
 import Countries from "./pages/CountriesPage";
 import LoginPage from "./pages/LoginPage";
+import ProtectedRoute from './components/ProtectedRoute';
 
 const router = createBrowserRouter([
   {
@@ -16,7 +17,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/countries",
-    element: <Countries />,
+    element: (
+        <ProtectedRoute >
+            <Countries />
+        </ProtectedRoute>
+    )
   },
 ]);
 

@@ -1,19 +1,81 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-type Props = {};
+import useAxiosWithToken from '../hooks/useAxiosWithToken';
 
-const Carousel = (props: Props) => {
+type Props = {
+  selectedCountry: string
+};
+
+const DEFAULT_IMAGE_URL = 'https://flowbite.com/docs/images/carousel/carousel-1.svg';
+
+const Carousel = ({ selectedCountry }: Props) => {
+  const [imgList, setImgList] = useState([]);
+  const [countryIdx, setCountryIdx] = useState(-1);
+  const [currentImg, setCurrentImg] = useState(DEFAULT_IMAGE_URL);
+  const axiosWithToken = useAxiosWithToken();
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const countryStr = selectedCountry === 'All' ? '' : selectedCountry;
+        const res = await axiosWithToken.get(`/countries/${countryStr}`);
+        if (res.data && res.data.length > 0) {
+          const imgArr: any = [];
+          res.data.forEach((country: any) => {
+            const { image_url } = country;
+            imgArr.push(image_url);
+          });
+          setImgList(imgArr)
+          setCurrentImg(imgArr[0]);
+          setCountryIdx(0);
+        } else {
+          setImgList([]);
+          setCurrentImg(DEFAULT_IMAGE_URL);
+          setCountryIdx(-1);
+        }
+      } catch (err) {
+        console.error('Get Countries Failed')
+        console.error(err)
+      }
+    }
+    fetchCountries();
+  }, [selectedCountry]);
+
+  const handleNext = () => {
+    if (countryIdx < 0) {
+      return;
+    }  
+    let idx = countryIdx + 1;
+    if (idx === imgList.length) {
+      idx = 0;
+    }
+    setCountryIdx(idx);
+    setCurrentImg(imgList[idx]);
+  }
+
+  const handlePrev = () => {
+    if (countryIdx < 0) {
+      return;
+    }  
+    let idx = countryIdx - 1;
+    if (idx < 0) {
+      idx = imgList.length - 1;
+    }
+    setCountryIdx(idx);
+    setCurrentImg(imgList[idx]);
+  }
+
   return (
     <div className="max-w-2xl relative mx-auto">
       <div className="overflow-hidden relative h-56 rounded-lg sm:h-64 xl:h-80 2xl:h-96">
         <img
-          src="https://flowbite.com/docs/images/carousel/carousel-1.svg"
+          src={currentImg}
           className="w-100"
           alt="..."
         />
       </div>
-      {/* Slider controls */}
       <button
+        onClick={handlePrev}
         type="button"
         className="flex absolute top-0 left-0 z-30 justify-center items-center px-4 h-full cursor-pointer group focus:outline-none"
         data-carousel-prev
@@ -37,6 +99,7 @@ const Carousel = (props: Props) => {
         </span>
       </button>
       <button
+        onClick={handleNext}
         type="button"
         className="flex absolute top-0 right-0 z-30 justify-center items-center px-4 h-full cursor-pointer group focus:outline-none"
         data-carousel-next
