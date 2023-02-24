@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  frontend:
+    container_name: ReactFrontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - NODE_ENV=development
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+  backend:
+    container_name: ExpressBackend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://user:password@db:5432/myapp
+    stdin_open: true
+    tty: true
+    depends_on:
+      - pg_db
+  pg_db:
+    image: postgres
+    restart: always
+    volumes:
+      - ./seeds:/docker-entrypoint-initdb.d/
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: myapp
+    ports:
+      - '5435:5432'
