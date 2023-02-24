@@ -2,28 +2,18 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
+
+import allowedOrigins from "./config/allowedOrigins";
+import routes from "./route";
 
 const app = express();
 
-
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cookieParser());
+app.use(cors(allowedOrigins));
 app.use(morgan("dev"));
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, World!");
-});
-
-app.post("/register", (req: Request, res: Response) => {
-  res.send("Registered");
-});
-
-app.post("/login", (req: Request, res: Response) => {
-  res.send("Authorized");
-});
-
-app.get("/countries/:country", (req: Request, res: Response) => {
-  res.send("List of Countries");
-});
+app.use("/", routes);
 
 export default app;
